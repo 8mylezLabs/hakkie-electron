@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Hello Alexander!</title>
+        <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+        <style>
+            * {
+                padding: 0;
+                margin: 0;
+            }
+
+            html, body {
+                height: 100%;
+                width: 100%;
+            }
+
+            .hakkie-app {
+                display: flex;
+                height: 100%;
+                width: 100%;
+                background-color: lightgrey;
+            }
+
+            .hakkie-sidebar {
+                background-color: bisque;
+                height: 100%;
+                width: 300px;
+            }
+
+            .hakkie-sidebar h2 {
+                text-align: center;
+                margin: 10px 0;
+            }
+
+            .hakkie-sidebar h3 {
+                text-align:  center;
+                font-size: 16px;
+                margin-top: 10px;
+                padding-bottom: 10px;
+                border-bottom: 1px solid gray;
+            }
+
+            .hakkie-sidebar .hakkie-navigation {
+                list-style: none;
+            }
+
+            .hakkie-sidebar .hakkie-navigation li {
+                border-bottom: 1px solid grey;
+            }
+
+            .hakkie-sidebar .hakkie-navigation li a {
+                display: block;
+                width: 100%;
+                height: 100%;
+                padding: 10px 25px;
+            }
+
+            .hakkie-content {
+                background-color: lightgrey;
+                width: 100%;
+                overflow-y: scroll;
+                padding: 25px;
+            }
+
+            .hakkie-content .hakkie-containers-list {
+                margin: 25px 0 0;
+                list-style: none;
+            }
+
+            .hakkie-content .hakkie-containers-list-item {
+                border: 1px solid gray;
+                padding: 25px;
+                margin-bottom: 15px;
+                display: flex;
+            }
+
+            .hakkie-container-label {
+
+            }
+
+            .hakkie-container-state {
+                height: 15px;
+                width: 15px;
+                border-radius: 15px;
+                margin-left: auto;
+            }
+
+            .is-exited {
+                background-color: indianred;
+            }
+
+            .is-running {
+                background-color: lightgreen;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="hakkie-app">
+            <div class="hakkie-sidebar">
+                <h2>Hakkie</h2>
+                <h3>local shopware development</h3>
+                <ul class="hakkie-navigation">
+                    <li>
+                        <a href="#">Shops</a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            Services
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            Settings
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="hakkie-content">
+                <h3 class="hakkie-container-list-headline">
+                    Local Containers
+                </h3>
+                <ul id="containers-list" class="hakkie-containers-list"></ul>
+                Node: <script>document.write(process.versions.node);</script>
+                Chrome: <script>document.write(process.versions.chrome);</script>
+                Electron: <script>document.write(process.versions.electron);</script>
+            </div>
+        </div>
+        <script>
+            const { ipcRenderer } = require('electron');
+
+            ipcRenderer.send('get-containers');
+
+            ipcRenderer.on('containers-list', (event, containers) => {
+                const containersList = document.getElementById('containers-list');
+
+                console.log('containers', containers);
+
+                containers.forEach((container) => {
+                    if(container.data.Labels['com.docker.compose.service']) {
+                        const containerItem = document.createElement("li");
+                        containerItem.classList.add('hakkie-containers-list-item');
+
+                        let state = "<div class='hakkie-container-state is-exited'></div>";
+
+                        if (container.data.State == "running") {
+                            state = "<div class='hakkie-container-state is-running'></div>";
+                        }
+
+                        let label = "<div class='hakkie-container-label'>"+ container.data.Labels['com.docker.compose.service'] +"</div>";
+
+                        containerItem.innerHTML = label + state;
+                        containersList.appendChild(containerItem);
+                    }
+                });
+            });
+        </script>
+    </body>
+</html>
