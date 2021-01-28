@@ -9,7 +9,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^7.1.1"
+    "electron": "^9.4.0"
   },
   "dependencies": {
     "node-docker-api": "^1.1.22"
